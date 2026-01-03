@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -10,8 +8,9 @@ public class MainManager : MonoBehaviour
     public int LineCount = 6;
     public Rigidbody Ball;
 
-    public Text ScoreText;
-    public GameObject GameOverText;
+    public Text scoreText;
+    public Text bestScoreText;
+    public GameObject gameOverText;
     
     private bool m_Started = false;
     private int m_Points;
@@ -36,6 +35,8 @@ public class MainManager : MonoBehaviour
                 brick.onDestroyed.AddListener(AddPoint);
             }
         }
+
+        SetBestScore();
     }
 
     private void Update()
@@ -62,15 +63,45 @@ public class MainManager : MonoBehaviour
         }
     }
 
-    void AddPoint(int point)
+    private void AddPoint(int point)
     {
         m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
+        scoreText.text = $"Score : {m_Points}";
     }
 
     public void GameOver()
     {
         m_GameOver = true;
-        GameOverText.SetActive(true);
+        gameOverText.SetActive(true);
+
+        if (m_Points > GameData.Instance.bestScore)
+        {
+            SetNewBestScore();
+        }
+    }
+
+    private void SetBestScore()
+    {
+        if (GameData.Instance.bestScore != 0)
+        {
+            bestScoreText.text = $"Best Score : {GameData.Instance.bestPlayerName} : {GameData.Instance.bestScore}";
+        }
+        else
+        {
+            bestScoreText.text = "No best score yet";
+        }
+    }
+
+    private void SetNewBestScore()
+    {
+        GameData.Instance.bestScore = m_Points;
+        GameData.Instance.bestPlayerName = GameData.Instance.playerName;
+        bestScoreText.text = $"Best Score : {GameData.Instance.bestPlayerName} : {GameData.Instance.bestScore}";
+        GameData.Instance.SaveBestScore(m_Points, GameData.Instance.playerName);
+    }
+
+    public void ReturnToMenu()
+    {
+        SceneManager.LoadScene(0);
     }
 }
